@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.2/d3.js"></script>
+		<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+</head>
+<body>
+	<script>
+				const h = 100;
+				const w = 400;
+				let ds; //empty var for dataset (ds)
+				let dsFlat;
+				let dsMap;
+				
+				const buildLine = () => {
+					const lineFun = d3
+						.line()
+						.x(function(d) {
+							return (d.month - 2000) / 3.25;
+						})
+						.y(function(d) {
+							return h - d.sales;
+						})
+						.curve(d3.curveLinear);
+				
+					const svg = d3
+						.select("body")
+						.append("svg")
+						.attrs({ width: w, height: h });
+				
+					const viz = svg.append("path").attrs({
+						d: lineFun(ds.monthlySales),
+						stroke: "green",
+						"stroke-width": 2,
+						fill: "none"
+					});
+				};
+				
+				function showHeader() {
+					d3
+						.select("body")
+						.append("h1")
+						.text(ds.category + " Sales (2013)");
+				}
+				
+				//call to load data and then build our viz
+				d3.json("MonthlySalesbyCategory.json", function(error, data) {
+					//error handling
+					if (error) {
+						console.log(error);
+					} else {
+						//console.log(JSON.stringify(data))
+						//multidimensional array
+						ds = data;
+						showHeader();
+						buildLine();
+					}
+				});
+				
+				const datapath = "https://data.cityofnewyork.us/resource/h6yn-47fn.csv";
+				d3.csv(datapath, function(error, data) {
+					//console.log(data);
+					//ds = data;
+					//console.log(Math.trunc(parseFloat(data[0].rate)));
+				});
+		</script>
+</body>
+
+</html>

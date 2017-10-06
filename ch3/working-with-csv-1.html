@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.2/d3.js"></script>
+		<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+		<script>
+				const h = 100;
+				const w = 400;
+				let ds; //empty var for dataset (ds)
+				let dsFlat;
+				let dsMap;
+				let salesTotal = 0.0;
+				let salesAvg = 0.0;
+				let metrics = [];
+				
+				const buildLine = () => {
+					const lineFun = d3
+						.line()
+						.x(function(d) {
+							console.log((d.month - 20130001) / 3.25)
+							return (d.month - 20130001) / 3.25;
+						})
+						.y(function(d) {
+							console.log(h - d.sales)
+							return h - d.sales;
+						})
+						.curve(d3.curveLinear);
+				
+					const svg = d3
+						.select("body")
+						.append("svg")
+						.attrs({ width: w, height: h });
+				
+					const viz = svg.append("path").attrs({
+						d: lineFun(ds),
+						stroke: "green",
+						"stroke-width": 2,
+						fill: "none"
+					});
+				};
+				
+				//get totals
+				function showTotals() {
+					// var salesTotal = d3.sum(ds['sales']);
+					// var salesTotal = d3.merge(ds);
+				
+					//sales total
+					for (var i = 0; i < ds.length; i++) {
+						salesTotal += ds[i]["sales"] * 1; //*1 to make it a number
+					}
+				
+					//sales average
+					salesAvg = salesTotal / ds.length;
+				
+					//add metrics to array
+					metrics.push("Sales Total: " + salesTotal);
+					metrics.push("Sales Avg: " + salesAvg.toFixed(2));
+				
+					// console.log(metrics);
+					var t = d3.select("body").append("table");
+				
+					//now add total
+					var tr = t
+						.selectAll("tr")
+						.data(metrics)
+						.enter()
+						.append("tr")
+						.append("td")
+						.text(function(d) {
+							return d;
+						});
+				}
+				
+				//call to load data and then build our viz
+				d3.csv("MonthlySales.csv", function(error, data) {
+					//error handling
+					if (error) {
+						console.log(error);
+					} else {
+						console.log(JSON.stringify(data))
+						//multidimensional array
+						ds = data;
+				
+						buildLine();
+						showTotals();
+					}
+				});
+				
+				const datapath = "https://data.cityofnewyork.us/resource/h6yn-47fn.csv";
+				d3.csv(datapath, function(error, data) {
+					//console.log(data);
+					//ds = data;
+					//console.log(Math.trunc(parseFloat(data[0].rate)));
+				});
+		</script>
+</head>
+
+<body>
+</body>
+
+</html>
